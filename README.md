@@ -5,3 +5,6 @@
 ## ENV
 python 3.8.3
 pydantic   1.6.1  
+
+## RUN
+> uvicorn main:app --reload
