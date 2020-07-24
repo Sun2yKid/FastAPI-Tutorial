@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 
@@ -77,3 +77,29 @@ async def create_item(item_id: int, item: Item, q: Optional[str] = None):
     if q:
         item_dict.update({"q": q})
     return item_dict
+
+
+@app.get("/items/")
+async def read_items(q: Optional[str] = Query(..., minlength=3, max_length=50, regex="^fixedquery$")):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+@app.get("/items/")
+async def read_items(q: Optional[List[str]] = Query(None)):
+    query_items = {"q": q}
+    return query_items
+
+
+@app.get("/items/")
+async def read_items(q: List[str] = Query(["foo", "bar"])):
+    query_items = {"q": q}
+    return query_items
+
+
+@app.get("/items/")
+async def read_items(q: list = Query([])):
+    query_items = {"q": q}
+    return query_items
