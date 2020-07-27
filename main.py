@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Optional, List
 
-from fastapi import FastAPI, Query, Path, Body
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 
@@ -175,3 +176,55 @@ async def update_item(
 ):
     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
     return results
+
+
+@app.get("/items/")
+async def read_items(ads_id: Optional[str] = Cookie(None)):
+    return {"ads_id": ads_id}
+
+
+@app.get("/items/")
+async def read_items(user_agent: Optional[str] = Header(None)):
+    return {"User-Agent": user_agent}
+
+
+@app.post("/login/")
+async def login(username: str = Form(...), password: str = Form(...)):
+    return {"username": username}
+
+
+@app.post("/files/")
+async def create_file(file: bytes = File(...)):
+    return {"file_size": len(file)}
+
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile = File(...)):
+    return {"filename": file.filename}
+
+
+@app.post("/files/")
+async def create_files(files: List[bytes] = File(...)):
+    return {"file_sizes": [len(file) for file in files]}
+
+
+@app.post("/uploadfiles/")
+async def create_upload_files(files: List[UploadFile] = File(...)):
+    return {"filenames": [file.filename for file in files]}
+
+
+@app.get("/")
+async def main():
+    content = """
+<body>
+<form action="/files/" enctype="multipart/form-data" method="post">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+<form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+</body>
+    """
+    return HTMLResponse(content=content)
