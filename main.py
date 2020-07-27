@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, List
 
-from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
@@ -32,6 +32,8 @@ class Item(BaseModel):
 app = FastAPI()
 
 fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
+
+items = {"foo": "The Foo Wrestlers"}
 
 
 @app.get("/")
@@ -239,3 +241,10 @@ async def create_file(
         "token": token,
         "filed_content_type": fileb.content_type,
     }
+
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: str):
+    if item_id not in items:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"item": items[item_id]}
