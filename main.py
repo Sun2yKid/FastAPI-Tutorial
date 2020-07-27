@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, List
 
-from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, HTTPException
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, HTTPException, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
@@ -232,15 +232,15 @@ async def main():
     return HTMLResponse(content=content)
 
 
-@app.post("/files/")
-async def create_file(
-        file: bytes = File(...), fileb: UploadFile = File(...), token: str = Form(...)
-):
-    return {
-        "file_size": len(file),
-        "token": token,
-        "filed_content_type": fileb.content_type,
-    }
+# @app.post("/files/")
+# async def create_file(
+#         file: bytes = File(...), fileb: UploadFile = File(...), token: str = Form(...)
+# ):
+#     return {
+#         "file_size": len(file),
+#         "token": token,
+#         "filed_content_type": fileb.content_type,
+#     }
 
 
 @app.get("/items/{item_id}")
@@ -248,3 +248,22 @@ async def read_item(item_id: str):
     if item_id not in items:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"item": items[item_id]}
+
+
+@app.post("/items/", response_model=Item, status_code=status.HTTP_201_CREATED, tags=["items"],
+          summary="create an item",
+          description="create an item with all the information, name, description, pirce, tax and a set of unique tags",
+          response_description="The created item",
+          deprecated=True)
+async def create_item(item: Item):
+    """
+    Create an item with all the information:
+
+    - **name**: each item must have a name
+    - **description**: a long description
+    - **price**: required
+    - **tax**: if the item doesn't have tax, you can omit this
+    - **tags**: a set of unique tag strings for this item
+    """
+    return item
+
