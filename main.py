@@ -213,7 +213,7 @@ async def create_upload_files(files: List[UploadFile] = File(...)):
     return {"filenames": [file.filename for file in files]}
 
 
-@app.get("/")
+@app.get("/files")
 async def main():
     content = """
 <body>
@@ -228,3 +228,14 @@ async def main():
 </body>
     """
     return HTMLResponse(content=content)
+
+
+@app.post("/files/")
+async def create_file(
+        file: bytes = File(...), fileb: UploadFile = File(...), token: str = Form(...)
+):
+    return {
+        "file_size": len(file),
+        "token": token,
+        "filed_content_type": fileb.content_type,
+    }
