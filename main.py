@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, HTTPException, status
 from fastapi.responses import HTMLResponse
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 
@@ -34,6 +35,8 @@ app = FastAPI()
 fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
 
 items = {"foo": "The Foo Wrestlers"}
+
+fake_db = {}
 
 
 @app.get("/")
@@ -267,3 +270,8 @@ async def create_item(item: Item):
     """
     return item
 
+
+@app.put("/items/{id}")
+def update_item(id: str, item: Item):
+    json_compatible_item_data = jsonable_encoder(item)
+    fake_db[id] = json_compatible_item_data
