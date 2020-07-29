@@ -28,7 +28,7 @@ def fake_hash_password(password: str):
     return "fakehashed" + password
 
 
-oath2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 class User(BaseModel):
@@ -53,7 +53,7 @@ def fake_decode_token(token):
     return user
 
 
-async def get_current_active_user(token: str = Depends(oath2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)):
     user = fake_decode_token(token)
     if not user:
         raise HTTPException(
@@ -62,6 +62,12 @@ async def get_current_active_user(token: str = Depends(oath2_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
 
 
 @app.post("/token")
@@ -88,7 +94,7 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 #     )
 #
 #
-async def get_courrent_user(token: str = Depends(oath2_scheme)):
+async def get_courrent_user(token: str = Depends(oauth2_scheme)):
     user = fake_decode_token(token)
     return user
 
@@ -99,7 +105,7 @@ async def read_users_me(current_user: User = Depends(get_courrent_user)):
 
 
 @app.get("/items/")
-async def read_items(token: str = Depends(oath2_scheme)):
+async def read_items(token: str = Depends(oauth2_scheme)):
     return {"token": token}
 
 
