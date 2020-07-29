@@ -1,2 +1,4 @@
 pydantic
 fastapi[all]
+python-jose[cryptography]
+passlib[bcrypt]
